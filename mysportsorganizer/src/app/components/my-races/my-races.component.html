@@ -1,0 +1,54 @@
+<div class="flex justify-between items-center">
+  <span class="title">
+    Mes courses
+  </span>
+</div>
+
+<div class="flex mt-[20px] mb-[20px]">
+  <p-select [options]="sports()"
+            [(ngModel)]="_selectedSport"
+            (onChange)="onSportSelected($event)"
+            optionLabel="nom" class="w-full md:w-56"/>
+
+</div>
+<div class="flex flex-wrap">
+
+  @for (course of courses(); track course.id) {
+    <div class="m-[20px] w-3/12">
+      <p-card [style]="{ width: '25rem', overflow: 'hidden' }">
+        <ng-template #header>
+        </ng-template>
+        <ng-template #title> {{course.titre}} </ng-template>
+        <div class="flex flex-wrap">
+          <div class="w-full">
+            <span>
+              {{(course.distance / 1000) + ' Km'}}
+              @if ( course.nomCourse) {
+                {{' - ' + course.nomCourse}}
+              }
+              {{ ' - ' + course.denivele + 'D+'}}
+            </span>
+          </div>
+          <div class="w-full">
+            <span>
+              {{course.date | date: 'fullDate'}}
+            </span>
+          </div>
+          <div class="w-full">
+            <span>
+              Temps restant: <span class="remaingDays">{{getRemaingDays(course.date) + ' jours'}}</span>
+            </span>
+          </div>
+        </div>
+        <p>
+
+        </p>
+        <ng-template #footer>
+          <div class="flex gap-4 mt-1">
+            <p-button label="Supprimer" class="w-full" styleClass="w-full" (onClick)="deleteRace()"/>
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+  }
+</div>
