@@ -1,7 +1,8 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {environment} from '../../../environments/environment';
 import {HttpClient} from '@angular/common/http';
-import {User} from '../../models/user.model';
+import {mapUser, User, UserDto} from '../../models/user.model';
+import {tap} from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -19,11 +20,16 @@ export class LoginService {
       this.dataUrl + '/login',
       { email, password },
       { withCredentials: true } // 🔑 important
-    );
+    ).pipe(
+      tap((userConnected) => {
+      this.userConnected.set(mapUser(userConnected as UserDto));
+    }))
   }
 
   logout() {
-    return this.http.post('/logout', {}, { withCredentials: true });
+    return this.http.post(this.dataUrl + '/logout', {}, { withCredentials: true }).pipe(
+      tap(() => this.userConnected.set(undefined))
+    );
   }
 
   me() {

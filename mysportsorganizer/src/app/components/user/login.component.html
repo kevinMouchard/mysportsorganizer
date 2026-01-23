@@ -9,11 +9,11 @@
     <form [formGroup]="loginForm" class="p-fluid mt-[20px]">
       <div class="flex items-center gap-4 mb-4">
         <label for="email" class="font-semibold w-34">Email *</label>
-        <input pInputText type="email" formControlName="email" id="email" class="" autocomplete="off"/>
+        <input pInputText type="email" formControlName="email" id="loginemail" class="" autocomplete="off"/>
       </div>
       <div class="flex items-center gap-4 mb-4">
         <label for="password" class="font-semibold w-34">Mot de passe *</label>
-        <input pInputText formControlName="password" id="password" class="" autocomplete="off" />
+        <input pInputText type="password" formControlName="password" id="loginpassword" class="" autocomplete="off" />
       </div>
       <div class="flex justify-end gap-2">
         <p-button label="Cancel" severity="secondary" (click)="closeDialog()" />

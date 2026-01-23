@@ -6,12 +6,12 @@ import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
 import {Toast} from 'primeng/toast';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {Button} from 'primeng/button';
-import {LoginComponent} from './components/user/login.component';
 import {LoginService} from './services/login/login.service';
+import {ToastService} from './services/toast.service';
 
 @Component({
   selector: 'app-root',
-  providers: [MessageService, ConfirmationService],
+  providers: [MessageService, ConfirmationService, ToastService],
   standalone: true,
   imports: [RouterOutlet, Menubar, Toast, ConfirmDialogModule, Button],
   template: `
@@ -23,16 +23,21 @@ import {LoginService} from './services/login/login.service';
         <p-menubar [model]="items"/>
       </div>
       <div class="w-2/12 flex flex-wrap">
-        <div class="w-6/12">
-          @if (loginService.userConnected() != undefined) {
-            <p>{{ loginService.userConnected()?.nom }}</p>
-          } @else {
-            <p>No user</p>
-          }
-        </div>
-        <div class="w-6/12">
-          <p-button class="right" label="Login" (click)="login()"/>
-        </div>
+        @if (loginService.userConnected() != undefined) {
+          <div class="w-10/12">
+              <p>{{'Bienvenue ' +  loginService.userConnected()?.prenom + ' ' + loginService.userConnected()?.nom }}</p>
+          </div>
+          <div class="w-2/12">
+            <p-button class="right" label="Logout" (click)="logout()"/>
+          </div>
+        } @else {
+          <div class="w-10/12">
+              <p>No user</p>
+          </div>
+          <div class="w-2/12">
+            <p-button class="right" label="Login" (click)="login()"/>
+          </div>
+        }
       </div>
     </div>
     <p-toast/>
@@ -46,7 +51,10 @@ export class App implements OnInit {
   private primeng = inject(PrimeNG);
   private router = inject(Router);
   public loginService = inject(LoginService);
+  toastService = inject(ToastService);
+
   protected readonly title = signal('MySports Organizer');
+
   items: MenuItem[] | undefined;
 
 
@@ -78,6 +86,14 @@ export class App implements OnInit {
   }
 
   protected login() {
+    this.toastService.showMessage('Vous êtes connecté');
     this.router.navigate(['/login']);
+  }
+
+  protected logout() {
+    this.loginService.logout().subscribe((result) => {
+      this.toastService.showMessage('Vous êtes déconnecté');
+      this.router.navigate(['/login']);
+    })
   }
 }
