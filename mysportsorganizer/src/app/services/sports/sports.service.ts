@@ -13,7 +13,7 @@ export class SportsService {
   private http = inject(HttpClient);
 
   getAllSports(): Observable<Sport[]> {
-    return this.http.get<any[]>(this.dataUrl).pipe(
+    return this.http.get<any[]>(this.dataUrl, { withCredentials: true }).pipe(
       catchError((error) => {
         console.error('Error fetching sports:', error);
         return of([]);

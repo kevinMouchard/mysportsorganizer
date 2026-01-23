@@ -13,6 +13,15 @@ const ThemePreset = definePreset(Aura, {
       root: {
         background: '#4d4d4d'
       }
+    },
+    accordion: {
+      panel: {
+        // borderColor: '#c3c141'
+      },
+      header: {
+        background: '#897f41',
+        activeBackground: '#897f41'
+      }
     }
   }
 });

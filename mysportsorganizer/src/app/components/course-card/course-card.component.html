@@ -1,0 +1,36 @@
+@if (course()) {
+  <p-card [style]="{ width: '30rem', overflow: 'hidden' }">
+    <ng-template #header>
+      <div class="right mr-[10px] mt-[10px]">
+        <p-button icon="pi pi-times" (onClick)="deleteRace()" />
+<!--        <p-button class="w-full" styleClass="w-full" (onClick)="deleteRace()">-->
+<!--          <i class="pi times" pButtonIcon></i>-->
+<!--        </p-button>-->
+      </div>
+    </ng-template>
+    <ng-template #title>
+      {{course()!.titre}}
+    </ng-template>
+    <div class="flex flex-wrap">
+      <div class="w-10/12 flex flex-wrap">
+        <div class="w-full">
+          <span>
+            {{(course()!.distance / 1000) + ' Km'}}
+            @if ( course()!.nomCourse) {
+              {{' - ' + course()!.nomCourse}}
+            }
+            {{ ' - ' + course()!.denivele + 'D+'}}
+          </span>
+        </div>
+        <div class="w-full">
+          <span>
+            {{course()!.date | date: 'fullDate'}}
+          </span>
+        </div>
+        <span>
+          Temps restant: <span class="remaingDays">{{getRemaingDays(course()!.date) + ' jours'}}</span>
+        </span>
+      </div>
+    </div>
+  </p-card>
+}

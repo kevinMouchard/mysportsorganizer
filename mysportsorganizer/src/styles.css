@@ -1,3 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import "tailwindcss";
+
+.right {
+  float: right;
+}
+
+input.ng-invalid.ng-touched {
+  border: 1px solid red;
+}
+.form-field.invalid .p-inputtext {
+  border: 1px solid red !important;
+}

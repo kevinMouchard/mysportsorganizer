@@ -7,7 +7,7 @@ export interface CourseDto {
   DENIVELE: number,
   NOM_COURSE: string,
   DATE: Date,
-  SPORT_ID: Sport,
+  SPORT_ID: number,
 };
 
 
@@ -29,7 +29,20 @@ export function mapCourse(dto: CourseDto): Course {
     distance: dto.DISTANCE,
     denivele: dto.DENIVELE,
     nomCourse: dto.NOM_COURSE,
-    date: dto.DATE,
-    sportId: dto.SPORT_ID.id
+    date: new Date(dto.DATE),
+    sportId: dto.SPORT_ID
+  };
+}
+
+
+export function courseToDto(course: Course): CourseDto {
+  return {
+    ID: course.id,
+    TITRE: course.titre,
+    DISTANCE: course.distance,
+    DENIVELE: course.denivele,
+    NOM_COURSE: course.nomCourse,
+    DATE: course.date,
+    SPORT_ID: course.sportId,
   };
 }
