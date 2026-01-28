@@ -14,36 +14,7 @@ import {ToastService} from './services/toast.service';
   providers: [MessageService, ConfirmationService, ToastService],
   standalone: true,
   imports: [RouterOutlet, Menubar, Toast, ConfirmDialogModule, Button],
-  template: `
-    <div class="flex flex-wrap">
-      <div class="w-1/12">
-        {{ title() }}
-      </div>
-      <div class="w-9/12">
-        <p-menubar [model]="items"/>
-      </div>
-      <div class="w-2/12 flex flex-wrap">
-        @if (loginService.userConnected() != undefined) {
-          <div class="w-10/12">
-              <p>{{'Bienvenue ' +  loginService.userConnected()?.prenom + ' ' + loginService.userConnected()?.nom }}</p>
-          </div>
-          <div class="w-2/12">
-            <p-button class="right" label="Logout" (click)="logout()"/>
-          </div>
-        } @else {
-          <div class="w-10/12">
-              <p>No user</p>
-          </div>
-          <div class="w-2/12">
-            <p-button class="right" label="Login" (click)="login()"/>
-          </div>
-        }
-      </div>
-    </div>
-    <p-toast/>
-    <p-confirmDialog></p-confirmDialog>
-    <router-outlet/>
-  `,
+  templateUrl: './app.html',
   styles: [],
 })
 export class App implements OnInit {

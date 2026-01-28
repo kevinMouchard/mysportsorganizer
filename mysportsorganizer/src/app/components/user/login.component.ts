@@ -42,7 +42,7 @@ export class LoginComponent {
     password: new FormControl('', { validators: [Validators.required] })
   });
 
-  protected doLogin() {
+  public doLogin() {
     if (this.loginForm.valid) {
       this.loginService.login(String(this.loginForm.value.email), String(this.loginForm.value.password)).subscribe({
         next: () => this.router.navigate(['/my-races']),

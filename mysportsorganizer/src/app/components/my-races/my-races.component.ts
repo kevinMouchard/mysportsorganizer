@@ -13,6 +13,7 @@ import {CourseCard} from '../course-card/course-card.component';
 import {DialogModule} from 'primeng/dialog';
 import {InputTextModule} from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
+import {ConfirmationService} from 'primeng/api';
 
 @Component({
   selector: 'my-races',
@@ -39,6 +40,7 @@ export class MyRacesComponent implements OnInit {
   toastService = inject(ToastService);
   sportsService = inject(SportsService);
   coursesService = inject(CoursesService);
+  private confirmationService = inject(ConfirmationService);
   private destroyRef = inject(DestroyRef);
 
   visible: boolean = false;
@@ -71,13 +73,34 @@ export class MyRacesComponent implements OnInit {
     });
   }
 
-  protected deleteRace(id: number | undefined) {
-    if (id) {
-      this.coursesService.deleteCourse(id).subscribe(() => {
-        this.coursesToCome.set(this.coursesToCome().filter(c => c.id !== id));
-        this.coursesOld.set(this.coursesOld().filter(c => c.id !== id));
-        this.toastService.showMessage('Courses supprimée ' + id);
-      })
+  protected deleteRace(course: Course | undefined) {
+    if (course && course.id) {
+      const id = course.id;
+      this.confirmationService.confirm({
+        message: 'Supprimer <span class="bold">' + course.titre + '</span> ?',
+        header: 'Suppression',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Annuler',
+        rejectButtonProps: {
+          label: 'Annuler',
+          severity: 'secondary',
+          outlined: true
+        },
+        acceptButtonProps: {
+          label: 'Supprimer',
+          severity: 'danger'
+        },
+
+        accept: () => {
+          this.coursesService.deleteCourse(id).subscribe(() => {
+            this.coursesToCome.set(this.coursesToCome().filter(c => c.id !== id));
+            this.coursesOld.set(this.coursesOld().filter(c => c.id !== id));
+            this.toastService.showMessage('Courses supprimée ' + id);
+          })
+        },
+        reject: () => {
+        }
+      });
     }
   }
 

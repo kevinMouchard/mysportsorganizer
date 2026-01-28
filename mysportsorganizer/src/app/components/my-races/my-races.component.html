@@ -20,9 +20,17 @@
       <p-accordion-header class="full-width">A venir</p-accordion-header>
       <p-accordion-content class="full-width">
         <div class="flex flex-wrap">
-          @for (course of coursesToCome(); track course.id) {
-            <div class="m-[20px] w-3/12">
-              <course-card [course]="course" (courseToDelete)="deleteRace($event)"></course-card>
+          @if (coursesToCome().length) {
+            @for (course of coursesToCome(); track course.id) {
+              <div class="m-[20px] w-3/12">
+                <course-card [course]="course" (courseToDelete)="deleteRace($event)"></course-card>
+              </div>
+            }
+          } @else {
+            <div class="w-full flex justify-center">
+              <div class="w-1/12">
+                <span>Aucune course</span>
+              </div>
             </div>
           }
         </div>
@@ -32,9 +40,17 @@
       <p-accordion-header>Passés</p-accordion-header>
       <p-accordion-content>
         <div class="flex flex-wrap">
-          @for (course of coursesOld(); track course.id) {
-            <div class="m-[20px] w-3/12">
-              <course-card [course]="course" (courseToDelete)="deleteRace($event)"></course-card>
+          @if (coursesToCome().length) {
+            @for (course of coursesOld(); track course.id) {
+              <div class="m-[20px] w-3/12">
+                <course-card [course]="course" (courseToDelete)="deleteRace($event)" [showTimeLeft]="false"></course-card>
+              </div>
+            }
+          } @else {
+            <div class="w-full flex justify-center">
+              <div class="w-1/12">
+                <span>Aucune course</span>
+              </div>
             </div>
           }
           </div>

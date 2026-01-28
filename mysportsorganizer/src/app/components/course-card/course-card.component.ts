@@ -23,16 +23,17 @@ export class CourseCard {
   confirmationService = inject(ConfirmationService);
 
   course: InputSignal<Course | undefined> = input<Course | undefined>();
-  courseToDelete = output<number | undefined>();
+  showTimeLeft: InputSignal<boolean> = input<boolean>(true);
+  courseToDelete = output<Course | undefined>();
 
 
-  protected getRemaingDays(date: Date) {
+  public getRemaingDays(date: Date) {
     const now = new Date();
     return differenceInCalendarDays(date, now);
   }
 
   protected deleteRace() {
-    this.courseToDelete.emit(this.course()?.id)
+    this.courseToDelete.emit(this.course())
     if (this.course()) {
       this.confirmationService.confirm({
         message: 'Are you sure you want to delete this?',

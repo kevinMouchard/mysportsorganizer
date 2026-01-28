@@ -2,13 +2,24 @@
 
 @import "tailwindcss";
 
-.right {
-  float: right;
+
+.topBar {
+  background-color: #292929;
 }
 
+/*Form validation */
 input.ng-invalid.ng-touched {
   border: 1px solid red;
 }
 .form-field.invalid .p-inputtext {
   border: 1px solid red !important;
+}
+
+/* Utils */
+.right {
+  float: right;
+}
+
+.bold {
+  font-weight: bold;
 }

@@ -1,0 +1,28 @@
+<div class="flex flex-wrap topBar">
+  <div class="w-2/12 flex items-center">
+    <span class="pl-20">{{ title() }}</span>
+  </div>
+  <div class="w-8/12">
+    <p-menubar [model]="items"/>
+  </div>
+  <div class="w-2/12 flex items-center flex-wrap">
+    @if (loginService.userConnected() != undefined) {
+      <div class="w-10/12">
+        <p>{{'Bienvenue ' +  loginService.userConnected()?.prenom + ' ' + loginService.userConnected()?.nom }}</p>
+      </div>
+      <div class="w-2/12">
+        <p-button class="right" label="Logout" (click)="logout()"/>
+      </div>
+    } @else {
+      <div class="w-10/12">
+<!--        <p>No user</p>-->
+      </div>
+      <div class="w-2/12">
+        <p-button class="right" label="Login" (click)="login()"/>
+      </div>
+    }
+  </div>
+</div>
+<p-toast/>
+<p-confirmDialog></p-confirmDialog>
+<router-outlet/>

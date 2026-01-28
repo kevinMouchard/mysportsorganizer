@@ -5,7 +5,7 @@ const ThemePreset = definePreset(Aura, {
   components: {
     menubar: {
       root: {
-        background: '#4d4d4d',
+        background: '#292929',
         borderColor: 'none'
       }
     },
