@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, effect, inject, OnInit, signal} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {Button} from 'primeng/button';
 import {ToastService} from '../../services/toast.service';
 import {Sport} from '../../models/sports.model';
@@ -8,24 +8,21 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {Select} from 'primeng/select';
 import {CoursesService} from '../../services/courses/courses.service';
 import {Course} from '../../models/course.model';
-import {Accordion, AccordionContent, AccordionHeader, AccordionPanel} from 'primeng/accordion';
-import {CourseCard} from '../course-card/course-card.component';
 import {DialogModule} from 'primeng/dialog';
 import {InputTextModule} from 'primeng/inputtext';
-import { DatePickerModule } from 'primeng/datepicker';
+import {DatePickerModule} from 'primeng/datepicker';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {SelectButtonModule} from 'primeng/selectbutton';
-import {TableModule, TableRowSelectEvent} from 'primeng/table';
+import {TableModule} from 'primeng/table';
 import {differenceInCalendarDays} from 'date-fns';
 import {DatePipe} from '@angular/common';
 import {CheckboxModule} from 'primeng/checkbox';
-import {form} from '@angular/forms/signals';
 import {forkJoin} from 'rxjs';
 
 @Component({
   selector: 'my-races',
   standalone: true,
-  providers: [ToastService, MessageService, ConfirmationService],
+  providers: [ToastService, MessageService],
   imports: [
     FormsModule,
     Select,
@@ -74,7 +71,7 @@ export class MyRacesComponent implements OnInit {
   coursesToCome = signal<Course[]>([]);
   coursesOld = signal<Course[]>([]);
 
-  selectedCourse =  signal<Course[] | null>(null);
+  selectedCourse =  signal<Course[]>([]);
 
   ngOnInit(): void {
     this.getAllSports();
@@ -182,5 +179,10 @@ export class MyRacesComponent implements OnInit {
     const minutes = Math.floor((ms % 3_600_000) / 60_000);
 
     return hours + 'h' + minutes;
+  }
+
+  protected setSelected($event: any) {
+    console.log($event);
+    this.selectedCourse.set($event)
   }
 }

@@ -19,10 +19,10 @@
 <div>
   <div class="ml-[2px]">
     <p-button [disabled]="!_selectedSport()" label="Ajouter" (onClick)="showAddRaceDialog()" />
-    <p-button [disabled]="!selectedCourse() || !selectedCourse()?.length" label="Supprimer" class="ml-[10px]" severity="danger" (onClick)="deleteRace()" />
+    <p-button [disabled]="!selectedCourse() || !selectedCourse().length" label="Supprimer" class="ml-[10px]" severity="danger" (onClick)="deleteRace()" />
   </div>
   @if (courseTypeSelected === 0) {
-    <p-table [value]="coursesToCome()" selectionMode="multiple" [selection]="selectedCourse()" dataKey="id" class="mt-2" (selectionChange)="this.selectedCourse.set($event)" [tableStyle]="{ 'min-width': '50rem' }">
+    <p-table [value]="coursesToCome()" selectionMode="multiple" [selection]="selectedCourse()" dataKey="id" class="mt-2" (selectionChange)="setSelected($event)" [tableStyle]="{ 'min-width': '50rem' }">
       <ng-template #header>
         <tr>
           <th style="width: 4rem">

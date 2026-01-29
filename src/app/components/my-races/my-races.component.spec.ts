@@ -6,6 +6,8 @@ import {registerLocaleData} from '@angular/common';
 import {LOCALE_ID} from '@angular/core';
 import {MyRacesComponent} from './my-races.component';
 import {mapSport, Sport, SportDto} from '../../models/sports.model';
+import {ConfirmationService, MessageService} from 'primeng/api';
+import {ToastService} from '../../services/toast.service';
 
 describe('CourseCard', () => {
   let component: MyRacesComponent;
@@ -38,6 +40,7 @@ describe('CourseCard', () => {
     await TestBed.configureTestingModule({
       imports: [MyRacesComponent],
       providers: [
+        ConfirmationService, ToastService, MessageService,
         { provide: LOCALE_ID, useValue: 'fr-FR' }
       ]
     })
