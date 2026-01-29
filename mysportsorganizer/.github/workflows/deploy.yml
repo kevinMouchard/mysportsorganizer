@@ -35,7 +35,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "dist/**"
+          source: "dist/mysportsorganizer/browser/**"
           target: "/var/www/mysportsorganizer"
           strip_components: 1
 
