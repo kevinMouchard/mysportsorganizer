@@ -9,59 +9,148 @@
             [(ngModel)]="_selectedSport"
             (onChange)="onSportSelected($event)"
             optionLabel="nom" class="w-full md:w-56"/>
-  <div class="ml-[20px]">
-    <p-button label="Ajouter une course" (onClick)="showAddRaceDialog()" />
+
+</div>
+
+<div class="flex justify-between items-center">
+  <p-selectbutton [options]="courseOptions" [(ngModel)]="courseTypeSelected" class="m-auto" optionLabel="label" optionValue="value" aria-labelledby="basic" (onChange)="courseTypeChanged()"/>
+</div>
+
+<div>
+  <div class="ml-[2px]">
+    <p-button [disabled]="!_selectedSport()" label="Ajouter" (onClick)="showAddRaceDialog()" />
+    <p-button [disabled]="!selectedCourse" label="Supprimer" class="ml-[10px]" severity="danger" (onClick)="deleteRace()" />
   </div>
-
-</div>
-<div class="">
-  <p-accordion [value]="['0']" [multiple]="true" class="full-width">
-    <p-accordion-panel value="0" class="full-width">
-      <p-accordion-header class="full-width">A venir</p-accordion-header>
-      <p-accordion-content class="full-width">
-        <div class="flex flex-wrap">
-          @if (coursesToCome().length) {
-            @for (course of coursesToCome(); track course.id) {
-              <div class="m-[20px] w-3/12">
-                <course-card [course]="course" (courseToDelete)="deleteRace($event)"></course-card>
-              </div>
-            }
+  @if (courseTypeSelected === 0) {
+    <p-table [value]="coursesToCome()" selectionMode="single" [(selection)]="selectedCourse" dataKey="id" class="mt-2" [tableStyle]="{ 'min-width': '50rem' }">
+      <ng-template #header>
+        <tr>
+          <th style="width: 4rem">
+            <p-tableHeaderCheckbox />
+          </th>
+          <th>Titre</th>
+          <th>Nom de course</th>
+          <th>Distance (Km)</th>
+          <th>Dénivelé</th>
+          <th>Date</th>
+          <th>Jours restants</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-course>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="course" />
+          </td>
+          <td>{{ course.titre }}</td>
+          <td>{{ course.nomCourse }}</td>
+          <td>{{ course.distance / 1000}}</td>
+          <td>{{ course.denivele + ' D+'}}</td>
+          <td>{{ course.date  | date: 'fullDate'}}</td>
+          <td>{{ getRemaingDays(course.date)}}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  } @else {
+    <p-table [value]="coursesOld()" selectionMode="single"  [(selection)]="selectedCourse" dataKey="id"  class="mt-2" [tableStyle]="{ 'min-width': '50rem' }">
+      <ng-template #header>
+        <tr>
+          <th style="width: 4rem">
+            <p-tableHeaderCheckbox />
+          </th>
+          <th>Titre</th>
+          <th>Nom de course</th>
+          <th>Distance (Km)</th>
+          <th>Dénivelé</th>
+          <th>Date</th>
+          <th>Temps réalisé</th>
+          <th>Fini</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-course>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="course" />
+          </td>
+          <td>{{ course.titre }}</td>
+          <td>{{ course.nomCourse }}</td>
+          <td>{{ course.distance / 1000}}</td>
+          <td>{{ course.denivele + ' D+'}}</td>
+          <td>{{ course.date | date: 'fullDate'}}</td>
+          <td>{{ milisecondsToTime(course.time) }}</td>
+          @if (course.finished === 1) {
+            <td><i class="pi pi-check"></i></td>
           } @else {
-            <div class="w-full flex justify-center">
-              <div class="w-1/12">
-                <span>Aucune course</span>
-              </div>
-            </div>
+            <td><i class="pi pi-times"></i></td>
           }
-        </div>
-      </p-accordion-content>
-    </p-accordion-panel>
-    <p-accordion-panel value="1">
-      <p-accordion-header>Passés</p-accordion-header>
-      <p-accordion-content>
-        <div class="flex flex-wrap">
-          @if (coursesToCome().length) {
-            @for (course of coursesOld(); track course.id) {
-              <div class="m-[20px] w-3/12">
-                <course-card [course]="course" (courseToDelete)="deleteRace($event)" [showTimeLeft]="false"></course-card>
-              </div>
-            }
-          } @else {
-            <div class="w-full flex justify-center">
-              <div class="w-1/12">
-                <span>Aucune course</span>
-              </div>
-            </div>
-          }
-          </div>
-      </p-accordion-content>
-    </p-accordion-panel>
-  </p-accordion>
-
+        </tr>
+      </ng-template>
+    </p-table>
+  }
 </div>
+<!--titre: string,-->
+<!--distance: number,-->
+<!--denivele: number,-->
+<!--nomCourse: string,-->
+<!--date: Date,-->
+<!--sportId: number,-->
+
+
+
+<!--<div class="mt-10">-->
+<!--  <p-accordion [value]="['0']" [multiple]="true" class="full-width">-->
+<!--    <p-accordion-panel value="0" class="full-width">-->
+<!--      <p-accordion-header class="full-width">A venir</p-accordion-header>-->
+<!--      <p-accordion-content class="full-width">-->
+<!--        <div class="flex flex-wrap">-->
+<!--          @if (coursesToCome().length) {-->
+<!--            @for (course of coursesToCome(); track course.id) {-->
+<!--              <div class="m-[20px] w-3/12">-->
+<!--                <course-card [course]="course" (courseToDelete)="deleteRace($event)"></course-card>-->
+<!--              </div>-->
+<!--            }-->
+<!--          } @else {-->
+<!--            <div class="w-full flex justify-center">-->
+<!--              <div class="w-1/12">-->
+<!--                <span>Aucune course</span>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          }-->
+<!--        </div>-->
+<!--      </p-accordion-content>-->
+<!--    </p-accordion-panel>-->
+<!--    <p-accordion-panel value="1">-->
+<!--      <p-accordion-header>Passés</p-accordion-header>-->
+<!--      <p-accordion-content>-->
+<!--        <div class="flex flex-wrap">-->
+<!--          @if (coursesToCome().length) {-->
+<!--            @for (course of coursesOld(); track course.id) {-->
+<!--              <div class="m-[20px] w-3/12">-->
+<!--                <course-card [course]="course" (courseToDelete)="deleteRace($event)" [showTimeLeft]="false"></course-card>-->
+<!--              </div>-->
+<!--            }-->
+<!--          } @else {-->
+<!--            <div class="w-full flex justify-center">-->
+<!--              <div class="w-1/12">-->
+<!--                <span>Aucune course</span>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          }-->
+<!--          </div>-->
+<!--      </p-accordion-content>-->
+<!--    </p-accordion-panel>-->
+<!--  </p-accordion>-->
+
+<!--</div>-->
 
 <p-dialog header="Nouvelle course" [modal]="true" [(visible)]="visible" [style]="{ width: '60%' }" >
   <form [formGroup]="courseForm" class="p-fluid">
+    <div class="flex items-center gap-4 mb-4">
+      <label for="distance" class="font-semibold w-24">Sport *</label>
+      <p-select [options]="sports()"
+                formControlName="sport"
+                appendTo="body"
+                optionLabel="nom" class="w-full md:w-56"/>
+    </div>
     <div class="flex items-center gap-4 mb-4">
       <label for="titre" class="font-semibold w-24">Titre *</label>
       <input pInputText id="titre" formControlName="titre" class="flex-auto" autocomplete="off" />
@@ -78,7 +167,7 @@
       <label for="distance" class="font-semibold w-24">Distance *</label>
       <input pInputText type="number" formControlName="distance" id="distance" class="" autocomplete="off" />
     </div>
-    <div class="flex items-center gap-4 mb-8">
+    <div class="flex items-center gap-4 mb-4">
       <label for="distance" class="font-semibold w-24">Date *</label>
       <div class="form-field"
            [class.invalid]="courseForm.controls.date.invalid &&
@@ -87,11 +176,12 @@
       </div>
     </div>
     <div class="flex items-center gap-4 mb-4">
-      <label for="distance" class="font-semibold w-24">Sport *</label>
-      <p-select [options]="sports()"
-                formControlName="sport"
-                appendTo="body"
-                optionLabel="nom" class="w-full md:w-56"/>
+      <label for="finished" class="font-semibold w-24">Fini ?</label>
+      <p-checkbox formControlName="finished" id="finished" [binary]="true" />
+    </div>
+    <div class="flex items-center gap-4 mb-4">
+      <label for="time" class="font-semibold w-24">Temps</label>
+      <input pInputText type="number" formControlName="time" id="time" class="" autocomplete="off" />
     </div>
     <div class="flex justify-end gap-2">
       <p-button label="Cancel" severity="secondary" (click)="visible = false" />

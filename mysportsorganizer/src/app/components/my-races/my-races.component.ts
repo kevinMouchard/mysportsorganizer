@@ -14,6 +14,12 @@ import {DialogModule} from 'primeng/dialog';
 import {InputTextModule} from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
 import {ConfirmationService} from 'primeng/api';
+import {SelectButtonModule} from 'primeng/selectbutton';
+import {TableModule} from 'primeng/table';
+import {differenceInCalendarDays} from 'date-fns';
+import {DatePipe} from '@angular/common';
+import {CheckboxModule} from 'primeng/checkbox';
+import {form} from '@angular/forms/signals';
 
 @Component({
   selector: 'my-races',
@@ -22,15 +28,13 @@ import {ConfirmationService} from 'primeng/api';
   imports: [
     FormsModule,
     Select,
-    Accordion,
-    AccordionPanel,
-    AccordionHeader,
-    AccordionContent,
-    CourseCard,
     Button,
     DialogModule, InputTextModule,
     ReactiveFormsModule,
-    DatePickerModule
+    DatePickerModule,
+    SelectButtonModule,
+    TableModule, DatePipe,
+    CheckboxModule
   ],
   templateUrl: './my-races.component.html',
   styleUrl: './my-races.component.scss',
@@ -40,8 +44,16 @@ export class MyRacesComponent implements OnInit {
   toastService = inject(ToastService);
   sportsService = inject(SportsService);
   coursesService = inject(CoursesService);
-  private confirmationService = inject(ConfirmationService);
-  private destroyRef = inject(DestroyRef);
+  confirmationService = inject(ConfirmationService);
+  destroyRef = inject(DestroyRef);
+
+  courseOptions: any = [
+    {label: 'A venir', value: 0},
+    {label: 'Passé', value: 1}
+  ];
+  courseTypeSelected: any;
+  selectedCourse!: Course;
+
 
   visible: boolean = false;
 
@@ -50,6 +62,8 @@ export class MyRacesComponent implements OnInit {
     distance: new FormControl(null, { validators: [Validators.required, Validators.min(0)] }),
     denivele: new FormControl(null, { validators: [Validators.required, Validators.min(0)] }),
     nomCourse: new FormControl('', { validators: [Validators.required] }),
+    time: new FormControl(null),
+    finished: new FormControl(false, { validators: [Validators.required] }),
     date: new FormControl<Date | null>(null, {validators: [Validators.required] }),
     sport: new FormControl({}, { validators: [Validators.required] }),
   });
@@ -62,7 +76,7 @@ export class MyRacesComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllSports();
-
+    this.courseTypeSelected = this.courseOptions[0].value;
   }
 
   getAllSports() {
@@ -73,11 +87,14 @@ export class MyRacesComponent implements OnInit {
     });
   }
 
-  protected deleteRace(course: Course | undefined) {
-    if (course && course.id) {
-      const id = course.id;
+  protected deleteRace() {
+    if (!this.selectedCourse) {
+      return;
+    }
+    if (this.selectedCourse.id) {
+      const id = this.selectedCourse.id;
       this.confirmationService.confirm({
-        message: 'Supprimer <span class="bold">' + course.titre + '</span> ?',
+        message: 'Supprimer <span class="bold">' + this.selectedCourse.titre + '</span> ?',
         header: 'Suppression',
         icon: 'pi pi-info-circle',
         rejectLabel: 'Annuler',
@@ -108,7 +125,7 @@ export class MyRacesComponent implements OnInit {
     const now = new Date().getTime();
     this.coursesService.getCoursesBySportId($event?.value?.id).subscribe((courses: Course[]) => {
       const sortedCToComeCourses = courses?.filter(c => c.date.getTime() > now).sort((a, b) => a.date.getTime() - b.date.getTime());
-      const sortedPassedCourses = courses?.filter(c => c.date.getTime() < now).sort((a, b) => a.date.getTime() - b.date.getTime());
+      const sortedPassedCourses = courses?.filter(c => c.date.getTime() < now).sort((a, b) => b.date.getTime() - a.date.getTime());
       this.coursesToCome.set(sortedCToComeCourses);
       this.coursesOld.set(sortedPassedCourses);
     })
@@ -128,6 +145,8 @@ export class MyRacesComponent implements OnInit {
         distance: Number(this.courseForm.value.distance),
         denivele: Number(this.courseForm.value.denivele),
         nomCourse: String(this.courseForm.value.nomCourse),
+        time: Number(this.courseForm.value.time),
+        finished: Boolean(this.courseForm.value.finished),
         date: new Date(this.courseForm.value.date || new Date()),
         sportId: (this.courseForm.value.sport as Sport).id
       }
@@ -141,4 +160,21 @@ export class MyRacesComponent implements OnInit {
       return;
     }
   }
+
+  protected courseTypeChanged() {
+    console.log('Course Type changed', this.courseTypeSelected);
+  }
+
+  public getRemaingDays(date: Date) {
+    const now = new Date();
+    return differenceInCalendarDays(date, now);
+  }
+
+  public milisecondsToTime(ms: number) {
+    const hours = Math.floor(ms / 3_600_000);
+    const minutes = Math.floor((ms % 3_600_000) / 60_000);
+
+    return hours + 'h' + minutes;
+  }
+
 }

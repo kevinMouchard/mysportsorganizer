@@ -22,6 +22,14 @@ const ThemePreset = definePreset(Aura, {
         background: '#897f41',
         activeBackground: '#897f41'
       }
+    },
+    datatable: {
+      header: {
+        color: '#6c4b4b',
+      },
+      headerCell: {
+        background: '#34d399',
+      }
     }
   }
 });
