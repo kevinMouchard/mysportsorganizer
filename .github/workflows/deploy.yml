@@ -41,7 +41,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          source: "dist/mysportsorganizer/browser"
+          source: "dist/mysportsorganizer/browser/**"
           target: "/var/www/mysportsorganizer"
 
       # 7️⃣ Set permissions & reload nginx
