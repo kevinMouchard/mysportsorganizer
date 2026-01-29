@@ -35,8 +35,8 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "dist/mysportsorganizer/browser/**"
-          target: "/var/www/mysportsorganizer"
+          source: "dist/mysportsorganizer/browser"
+          target: "/var/www/mysportsorganizer/dist/mysportsorganizer/"
           strip_components: 1
 
       - name: Fix permissions & reload nginx
