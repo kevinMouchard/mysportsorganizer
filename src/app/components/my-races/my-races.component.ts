@@ -13,7 +13,7 @@ import {CourseCard} from '../course-card/course-card.component';
 import {DialogModule} from 'primeng/dialog';
 import {InputTextModule} from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
-import {ConfirmationService} from 'primeng/api';
+import {ConfirmationService, MessageService} from 'primeng/api';
 import {SelectButtonModule} from 'primeng/selectbutton';
 import {TableModule, TableRowSelectEvent} from 'primeng/table';
 import {differenceInCalendarDays} from 'date-fns';
@@ -25,7 +25,7 @@ import {forkJoin} from 'rxjs';
 @Component({
   selector: 'my-races',
   standalone: true,
-  providers: [ToastService],
+  providers: [ToastService, MessageService, ConfirmationService],
   imports: [
     FormsModule,
     Select,

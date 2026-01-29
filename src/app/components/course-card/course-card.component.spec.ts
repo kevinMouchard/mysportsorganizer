@@ -18,6 +18,8 @@ describe('CourseCard', () => {
     DENIVELE: 1150,
     NOM_COURSE: 'Le Trail des Massacans',
     DATE: new Date('2026-03-29'),
+    TIME: 15000000,
+    FINISHED: true,
     SPORT_ID: 1
 }
 
