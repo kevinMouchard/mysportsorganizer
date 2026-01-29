@@ -79,6 +79,7 @@ export class MyRacesComponent implements OnInit {
   ngOnInit(): void {
     this.getAllSports();
     this.courseTypeSelected = this.courseOptions[0].value;
+    console.log('in course');
   }
 
   getAllSports() {
