@@ -1,4 +1,4 @@
-import {Component, DestroyRef, effect, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, effect, inject, OnInit, signal} from '@angular/core';
 import {Button} from 'primeng/button';
 import {ToastService} from '../../services/toast.service';
 import {Sport} from '../../models/sports.model';
@@ -15,11 +15,12 @@ import {InputTextModule} from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
 import {ConfirmationService} from 'primeng/api';
 import {SelectButtonModule} from 'primeng/selectbutton';
-import {TableModule} from 'primeng/table';
+import {TableModule, TableRowSelectEvent} from 'primeng/table';
 import {differenceInCalendarDays} from 'date-fns';
 import {DatePipe} from '@angular/common';
 import {CheckboxModule} from 'primeng/checkbox';
 import {form} from '@angular/forms/signals';
+import {forkJoin} from 'rxjs';
 
 @Component({
   selector: 'my-races',
@@ -52,7 +53,6 @@ export class MyRacesComponent implements OnInit {
     {label: 'Passé', value: 1}
   ];
   courseTypeSelected: any;
-  selectedCourse!: Course;
 
 
   visible: boolean = false;
@@ -63,7 +63,7 @@ export class MyRacesComponent implements OnInit {
     denivele: new FormControl(null, { validators: [Validators.required, Validators.min(0)] }),
     nomCourse: new FormControl('', { validators: [Validators.required] }),
     time: new FormControl(null),
-    finished: new FormControl(false, { validators: [Validators.required] }),
+    finished: new FormControl(false),
     date: new FormControl<Date | null>(null, {validators: [Validators.required] }),
     sport: new FormControl({}, { validators: [Validators.required] }),
   });
@@ -73,6 +73,8 @@ export class MyRacesComponent implements OnInit {
 
   coursesToCome = signal<Course[]>([]);
   coursesOld = signal<Course[]>([]);
+
+  selectedCourse =  signal<Course[] | null>(null);
 
   ngOnInit(): void {
     this.getAllSports();
@@ -88,37 +90,37 @@ export class MyRacesComponent implements OnInit {
   }
 
   protected deleteRace() {
-    if (!this.selectedCourse) {
+    if (!this.selectedCourse() || !this.selectedCourse()?.length) {
       return;
     }
-    if (this.selectedCourse.id) {
-      const id = this.selectedCourse.id;
-      this.confirmationService.confirm({
-        message: 'Supprimer <span class="bold">' + this.selectedCourse.titre + '</span> ?',
-        header: 'Suppression',
-        icon: 'pi pi-info-circle',
-        rejectLabel: 'Annuler',
-        rejectButtonProps: {
-          label: 'Annuler',
-          severity: 'secondary',
-          outlined: true
-        },
-        acceptButtonProps: {
-          label: 'Supprimer',
-          severity: 'danger'
-        },
+    const ids: number[] = this.selectedCourse()!.map(s => s.id);
+    this.confirmationService.confirm({
+      message: 'Supprimer <span class="bold">' + this.selectedCourse()!.map(s => s.titre).join(', ') + '</span> ?',
+      header: 'Suppression',
+      icon: 'pi pi-info-circle',
+      rejectLabel: 'Annuler',
+      rejectButtonProps: {
+        label: 'Annuler',
+        severity: 'secondary',
+        outlined: true
+      },
+      acceptButtonProps: {
+        label: 'Supprimer',
+        severity: 'danger'
+      },
 
-        accept: () => {
-          this.coursesService.deleteCourse(id).subscribe(() => {
-            this.coursesToCome.set(this.coursesToCome().filter(c => c.id !== id));
-            this.coursesOld.set(this.coursesOld().filter(c => c.id !== id));
-            this.toastService.showMessage('Courses supprimée ' + id);
-          })
-        },
-        reject: () => {
-        }
-      });
-    }
+      accept: () => {
+        const reqs = this.selectedCourse()!.map(s => this.coursesService.deleteCourse(s.id));
+        forkJoin(reqs).subscribe(() => {
+          this.coursesToCome.set(this.coursesToCome().filter(c => !ids.find(i => c.id === i)));
+          this.coursesOld.set(this.coursesOld().filter(c => !ids.find(i => c.id === i)));
+          this.toastService.showMessage(this.selectedCourse()!.length > 1 ? 'Courses supprimées' : 'Course supprimée');
+          this.selectedCourse.set([]);
+        })
+      },
+      reject: () => {
+      }
+    });
   }
 
   protected onSportSelected($event: any) {
@@ -150,9 +152,13 @@ export class MyRacesComponent implements OnInit {
         date: new Date(this.courseForm.value.date || new Date()),
         sportId: (this.courseForm.value.sport as Sport).id
       }
-      this.coursesService.addCourse(courseToAdd).subscribe(() => {
+      this.coursesService.addCourse(courseToAdd).subscribe((courseAdded) => {
         this.toastService.showMessage('Course ajoutée ' + this.courseForm.value.titre);
-        // add to liste
+        if (courseToAdd.date.getTime() > new Date().getTime()) {
+          this.coursesToCome.update(courses => [...courses, courseToAdd]);
+        } else {
+          this.coursesOld.update(courses => [...courses, courseToAdd]);
+        }
       })
     } else {
       this.courseForm.markAsDirty();
@@ -162,7 +168,7 @@ export class MyRacesComponent implements OnInit {
   }
 
   protected courseTypeChanged() {
-    console.log('Course Type changed', this.courseTypeSelected);
+    this.selectedCourse.set([]);
   }
 
   public getRemaingDays(date: Date) {
@@ -176,5 +182,4 @@ export class MyRacesComponent implements OnInit {
 
     return hours + 'h' + minutes;
   }
-
 }
