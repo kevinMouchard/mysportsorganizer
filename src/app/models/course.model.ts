@@ -9,7 +9,8 @@ export interface CourseDto {
   DATE: Date,
   TIME: number,
   FINISHED: boolean,
-  SPORT_ID: number
+  SPORT_ID: number,
+  USER_ID: number,
 };
 
 
@@ -23,6 +24,7 @@ export interface Course {
   time: number,
   finished: boolean,
   sportId: number,
+  userId: number
 };
 
 
@@ -36,7 +38,8 @@ export function mapCourse(dto: CourseDto): Course {
     time: dto.TIME,
     finished: dto.FINISHED,
     date: new Date(dto.DATE),
-    sportId: dto.SPORT_ID
+    sportId: dto.SPORT_ID,
+    userId: dto.USER_ID
   };
 }
 
@@ -52,5 +55,6 @@ export function courseToDto(course: Course): CourseDto {
     TIME: course.time,
     FINISHED: course.finished,
     SPORT_ID: course.sportId,
+    USER_ID: course.userId,
   };
 }

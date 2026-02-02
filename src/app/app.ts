@@ -3,7 +3,7 @@ import {Router, RouterOutlet} from '@angular/router';
 import {PrimeNG} from 'primeng/config';
 import {Menubar} from 'primeng/menubar';
 import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
-import {Toast} from 'primeng/toast';
+import {ToastModule} from 'primeng/toast';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {Button} from 'primeng/button';
 import {LoginService} from './services/login/login.service';
@@ -13,7 +13,7 @@ import {ToastService} from './services/toast.service';
   selector: 'app-root',
   providers: [MessageService, ConfirmationService, ToastService],
   standalone: true,
-  imports: [RouterOutlet, Menubar, Toast, ConfirmDialogModule, Button],
+  imports: [RouterOutlet, Menubar, ToastModule, ConfirmDialogModule, Button],
   templateUrl: './app.html',
   styles: [],
 })

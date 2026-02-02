@@ -1,11 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import {By} from '@angular/platform-browser';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import localeFr from '@angular/common/locales/fr';
 import {registerLocaleData} from '@angular/common';
 import {LOCALE_ID} from '@angular/core';
 import {MyRacesComponent} from './my-races.component';
-import {mapSport, Sport, SportDto} from '../../models/sports.model';
+import {SportDto} from '../../models/sports.model';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {ToastService} from '../../services/toast.service';
 

@@ -7,7 +7,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Select} from 'primeng/select';
 import {CoursesService} from '../../services/courses/courses.service';
-import {Course} from '../../models/course.model';
+import {Course, CourseDto, mapCourse} from '../../models/course.model';
 import {DialogModule} from 'primeng/dialog';
 import {InputTextModule} from 'primeng/inputtext';
 import {DatePickerModule} from 'primeng/datepicker';
@@ -18,11 +18,12 @@ import {differenceInCalendarDays} from 'date-fns';
 import {DatePipe} from '@angular/common';
 import {CheckboxModule} from 'primeng/checkbox';
 import {forkJoin} from 'rxjs';
+import {LoginService} from '../../services/login/login.service';
 
 @Component({
   selector: 'my-races',
   standalone: true,
-  providers: [ToastService, MessageService],
+  providers: [MessageService],
   imports: [
     FormsModule,
     Select,
@@ -43,6 +44,7 @@ export class MyRacesComponent implements OnInit {
   sportsService = inject(SportsService);
   coursesService = inject(CoursesService);
   confirmationService = inject(ConfirmationService);
+  loginService = inject(LoginService);
   destroyRef = inject(DestroyRef);
 
   courseOptions: any = [
@@ -148,14 +150,18 @@ export class MyRacesComponent implements OnInit {
         time: Number(this.courseForm.value.time),
         finished: Boolean(this.courseForm.value.finished),
         date: new Date(this.courseForm.value.date || new Date()),
-        sportId: (this.courseForm.value.sport as Sport).id
+        sportId: (this.courseForm.value.sport as Sport).id,
+        userId: this.loginService.userConnected()!.id
       }
-      this.coursesService.addCourse(courseToAdd).subscribe((courseAdded) => {
-        this.toastService.showMessage('Course ajoutée ' + this.courseForm.value.titre);
-        if (courseToAdd.date.getTime() > new Date().getTime()) {
-          this.coursesToCome.update(courses => [...courses, courseToAdd]);
-        } else {
-          this.coursesOld.update(courses => [...courses, courseToAdd]);
+      this.coursesService.addCourse(courseToAdd).subscribe((res: CourseDto) => {
+        if (res && res.TITRE) {
+          courseToAdd.id = mapCourse(res).id;
+          this.toastService.showMessage('Course ajoutée ' + this.courseForm.value.titre);
+          if (courseToAdd.date.getTime() > new Date().getTime()) {
+            this.coursesToCome.update(courses => [...courses, courseToAdd]);
+          } else {
+            this.coursesOld.update(courses => [...courses, courseToAdd]);
+          }
         }
       })
     } else {

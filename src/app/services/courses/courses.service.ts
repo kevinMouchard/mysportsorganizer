@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {catchError, map, Observable, of} from 'rxjs';
-import {Course, courseToDto, mapCourse} from '../../models/course.model';
+import {Course, CourseDto, courseToDto, mapCourse} from '../../models/course.model';
 import {environment} from '../../../environments/environment';
 
 @Injectable({
@@ -37,11 +37,11 @@ export class CoursesService {
     );
   }
 
-  addCourse(course: Course) {
-     return this.http.post(this.dataUrl, courseToDto(course), { withCredentials: true }).pipe(
+  addCourse(course: Course): Observable<CourseDto> {
+     return this.http.post<CourseDto>(this.dataUrl, courseToDto(course), { withCredentials: true }).pipe(
        catchError((error) => {
          console.error('Error adding course:', error);
-         return of([]);
+         return of({} as CourseDto);
        })
      );
    }
@@ -50,7 +50,7 @@ export class CoursesService {
      return this.http.delete(this.dataUrl + '/' + courseId, { withCredentials: true }).pipe(
        catchError((error) => {
          console.error('Error deleting course:', error);
-         return of([]);
+         return of({} as CourseDto);
        })
      );
    }

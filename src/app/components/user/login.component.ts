@@ -25,9 +25,6 @@ export class LoginComponent {
   userService = inject(UserService);
   router = inject(Router);
 
-  userConnected = signal<LoginComponent | undefined>(undefined);
-  isLogin = signal<boolean>(true);
-
   userForm = new FormGroup({
     nom: new FormControl('', { validators: [Validators.required] }),
     prenom: new FormControl('', { validators: [Validators.required] }),
@@ -67,7 +64,12 @@ export class LoginComponent {
         password: String(this.userForm.value.password),
       }
       this.userService.addUser(userToAdd).subscribe({
-        next: () => this.router.navigate(['/my-races']),
+        next: () => {
+          this.loginService.login(userToAdd.email, userToAdd.password).subscribe({
+            next: () => this.router.navigate(['/my-races']),
+            error: () => alert('Login failed')
+          });
+        },
         error: () => alert('Login failed')
       });
     } else {
