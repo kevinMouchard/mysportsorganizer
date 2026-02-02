@@ -20,7 +20,8 @@ describe('CourseCard', () => {
     DATE: new Date('2026-03-29'),
     TIME: 15000000,
     FINISHED: true,
-    SPORT_ID: 1
+    SPORT_ID: 1,
+    USER_ID: 1
 }
 
   beforeAll(() => {
