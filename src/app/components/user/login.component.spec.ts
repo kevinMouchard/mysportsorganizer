@@ -31,8 +31,8 @@ describe('LoginComponent', () => {
   });
 
   it('should render email and password inputs', () => {
-    const emailInput = fixture.debugElement.query(By.css('input[type="email"]'));
-    const passwordInput = fixture.debugElement.query(By.css('input[type="password"]'));
+    const emailInput = fixture.debugElement.query(By.css('input[id="loginemail"]'));
+    const passwordInput = fixture.debugElement.query(By.css('input[id="loginpassword"]'));
     const submitButton = fixture.debugElement.query(By.css('p-button[label="login"]'));
 
     expect(emailInput).toBeTruthy();
