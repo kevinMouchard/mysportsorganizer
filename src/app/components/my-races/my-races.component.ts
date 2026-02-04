@@ -1,4 +1,4 @@
-import {Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {Component, DestroyRef, effect, inject, OnInit, signal} from '@angular/core';
 import {Button} from 'primeng/button';
 import {ToastService} from '../../services/toast.service';
 import {Sport} from '../../models/sports.model';
@@ -51,10 +51,8 @@ export class MyRacesComponent implements OnInit {
     {label: 'A venir', value: 0},
     {label: 'Passé', value: 1}
   ];
-  courseTypeSelected: any;
-
-
-  visible: boolean = false;
+  courseTypeSelected = signal(0);
+  visible = signal(false);
 
   courseForm = new FormGroup({
     titre: new FormControl('', { validators: [Validators.required] }),
@@ -75,9 +73,19 @@ export class MyRacesComponent implements OnInit {
 
   selectedCourse =  signal<Course[]>([]);
 
+  constructor() {
+    effect(() => {
+      const sport = this._selectedSport();
+      if (!sport) {
+        return;
+      }
+      this.onSportSelected(sport.id);
+    });
+  }
+
   ngOnInit(): void {
     this.getAllSports();
-    this.courseTypeSelected = this.courseOptions[0].value;
+    this.courseTypeSelected.set(this.courseOptions[0].value);
     console.log('in course');
   }
 
@@ -86,6 +94,7 @@ export class MyRacesComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef) // Auto-unsubscribe on destroy
     ).subscribe((sports: Sport[]) => {
       this.sports.set(sports);
+      this._selectedSport.set(this.sports().find(s => s.code === 'TRA'));
     });
   }
 
@@ -123,9 +132,9 @@ export class MyRacesComponent implements OnInit {
     });
   }
 
-  protected onSportSelected($event: any) {
+  protected onSportSelected(id: any) {
     const now = new Date().getTime();
-    this.coursesService.getCoursesBySportId($event?.value?.id).subscribe((courses: Course[]) => {
+    this.coursesService.getCoursesBySportId(id).subscribe((courses: Course[]) => {
       const sortedCToComeCourses = courses?.filter(c => c.date.getTime() > now).sort((a, b) => a.date.getTime() - b.date.getTime());
       const sortedPassedCourses = courses?.filter(c => c.date.getTime() < now).sort((a, b) => b.date.getTime() - a.date.getTime());
       this.coursesToCome.set(sortedCToComeCourses);
@@ -135,12 +144,15 @@ export class MyRacesComponent implements OnInit {
 
   showAddRaceDialog() {
     this.courseForm.reset();
-    this.visible = true;
+    this.courseForm.patchValue({
+      sport: this._selectedSport()
+    })
+    this.visible.set(true);
   }
 
   saveRace() {
     if (this.courseForm?.valid) {
-      this.visible = false;
+      this.visible.set(false);
       const courseToAdd: Course = {
         id: 0,
         titre: String(this.courseForm.value.titre),
@@ -171,7 +183,8 @@ export class MyRacesComponent implements OnInit {
     }
   }
 
-  protected courseTypeChanged() {
+  protected courseTypeChanged(selected: any) {
+    this.courseTypeSelected.set(selected.value);
     this.selectedCourse.set([]);
   }
 
