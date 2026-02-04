@@ -8,6 +8,7 @@ import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {Button} from 'primeng/button';
 import {LoginService} from './services/login/login.service';
 import {ToastService} from './services/toast.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,7 @@ import {ToastService} from './services/toast.service';
   standalone: true,
   imports: [RouterOutlet, Menubar, ToastModule, ConfirmDialogModule, Button],
   templateUrl: './app.html',
-  styles: [],
+  styleUrl: './app.css',
 })
 export class App implements OnInit {
 
@@ -28,7 +29,15 @@ export class App implements OnInit {
 
   items: MenuItem[] | undefined;
 
+  isMobile = signal(false);
 
+  constructor() {
+    inject(BreakpointObserver)
+      .observe([Breakpoints.Handset])
+      .subscribe(result => {
+        this.isMobile.set(result.matches);
+      });
+  }
 
 
   ngOnInit(): void {
@@ -39,25 +48,24 @@ export class App implements OnInit {
         icon: 'pi pi-home',
         routerLink: ['/my-races']
       },
-      {
-        label: 'Courses',
-        icon: 'pi pi-star',
-        items: [
-          {
-            label: 'Mes courses',
-            routerLink: ['/my-races']
-          }
-        ]
-      },
-      {
-        label: 'Entrainements',
-        icon: 'pi pi-search'
-      }
+      // {
+      //   label: 'Courses',
+      //   icon: 'pi pi-star',
+      //   items: [
+      //     {
+      //       label: 'Mes courses',
+      //       routerLink: ['/my-races']
+      //     }
+      //   ]
+      // },
+      // {
+      //   label: 'Entrainements',
+      //   icon: 'pi pi-search'
+      // }
     ]
   }
 
   protected login() {
-    this.toastService.showMessage('Vous êtes connecté');
     this.router.navigate(['/login']);
   }
 

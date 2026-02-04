@@ -8,6 +8,8 @@ import {LoginService} from '../../services/login/login.service';
 import {Router} from '@angular/router';
 import {UserService} from '../../services/user/user.service';
 import {User} from '../../models/user.model';
+import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
+import {NgClass} from '@angular/common';
 
 @Component({
   selector: 'app-user',
@@ -15,7 +17,7 @@ import {User} from '../../models/user.model';
     Button,
     DialogModule, InputTextModule,
     ReactiveFormsModule,
-    DatePickerModule],
+    DatePickerModule, NgClass],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
@@ -38,6 +40,16 @@ export class LoginComponent {
     email: new FormControl('', { validators: [Validators.required, Validators.email] }),
     password: new FormControl('', { validators: [Validators.required] })
   });
+
+  isMobile = signal(false);
+
+  constructor() {
+    inject(BreakpointObserver)
+      .observe([Breakpoints.Handset])
+      .subscribe(result => {
+        this.isMobile.set(result.matches);
+      });
+  }
 
   public doLogin() {
     if (this.loginForm.valid) {

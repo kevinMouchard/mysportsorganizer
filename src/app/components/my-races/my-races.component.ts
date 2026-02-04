@@ -74,13 +74,7 @@ export class MyRacesComponent implements OnInit {
   selectedCourse =  signal<Course[]>([]);
 
   constructor() {
-    effect(() => {
-      const sport = this._selectedSport();
-      if (!sport) {
-        return;
-      }
-      this.onSportSelected(sport.id);
-    });
+    this.setEffects();
   }
 
   ngOnInit(): void {
@@ -203,5 +197,15 @@ export class MyRacesComponent implements OnInit {
   protected setSelected($event: any) {
     console.log($event);
     this.selectedCourse.set($event)
+  }
+
+  private setEffects() {
+    effect(() => {
+      const sport = this._selectedSport();
+      if (!sport) {
+        return;
+      }
+      this.onSportSelected(sport.id);
+    });
   }
 }
