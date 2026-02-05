@@ -88,7 +88,7 @@
 </div>
 
 @defer {
-  <p-dialog header="Nouvelle course" [modal]="true" [(visible)]="visible" [style]="{ width: '60%' }" >
+  <p-dialog header="Nouvelle course" [modal]="true" [(visible)]="visible" [ngStyle]="{ 'width.%': modalWidth }">
     <form [formGroup]="courseForm" class="p-fluid">
       <div class="flex items-center gap-4 mb-4">
         <label for="distance" class="font-semibold w-24">Sport *</label>

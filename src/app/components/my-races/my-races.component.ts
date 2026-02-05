@@ -15,10 +15,11 @@ import {ConfirmationService, MessageService} from 'primeng/api';
 import {SelectButtonModule} from 'primeng/selectbutton';
 import {TableModule} from 'primeng/table';
 import {differenceInCalendarDays} from 'date-fns';
-import {DatePipe} from '@angular/common';
+import {DatePipe, NgStyle} from '@angular/common';
 import {CheckboxModule} from 'primeng/checkbox';
 import {forkJoin} from 'rxjs';
 import {LoginService} from '../../services/login/login.service';
+import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 
 @Component({
   selector: 'my-races',
@@ -33,7 +34,7 @@ import {LoginService} from '../../services/login/login.service';
     DatePickerModule,
     SelectButtonModule,
     TableModule, DatePipe,
-    CheckboxModule
+    CheckboxModule, NgStyle
   ],
   templateUrl: './my-races.component.html',
   styleUrl: './my-races.component.scss',
@@ -73,8 +74,19 @@ export class MyRacesComponent implements OnInit {
 
   selectedCourse =  signal<Course[]>([]);
 
+  isMobile = signal(false);
+  modalWidth = signal('60');
+
   constructor() {
     this.setEffects();
+    inject(BreakpointObserver)
+      .observe([Breakpoints.Handset])
+      .subscribe(result => {
+        this.isMobile.set(result.matches);
+        if (this.isMobile()) {
+          this.modalWidth.set(this.isMobile() ? '95' : '60');
+        }
+      });
   }
 
   ngOnInit(): void {
