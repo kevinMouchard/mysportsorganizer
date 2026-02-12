@@ -11,6 +11,7 @@ export interface CourseDto {
   FINISHED: boolean,
   SPORT_ID: number,
   USER_ID: number,
+  GPX_FILE: string,
 };
 
 
@@ -24,7 +25,8 @@ export interface Course {
   time: number,
   finished: boolean,
   sportId: number,
-  userId: number
+  userId: number,
+  gpxFile: string
 };
 
 
@@ -39,7 +41,8 @@ export function mapCourse(dto: CourseDto): Course {
     finished: dto.FINISHED,
     date: new Date(dto.DATE),
     sportId: dto.SPORT_ID,
-    userId: dto.USER_ID
+    userId: dto.USER_ID,
+    gpxFile: dto.GPX_FILE
   };
 }
 
@@ -56,5 +59,6 @@ export function courseToDto(course: Course): CourseDto {
     FINISHED: course.finished,
     SPORT_ID: course.sportId,
     USER_ID: course.userId,
+    GPX_FILE: course.gpxFile,
   };
 }

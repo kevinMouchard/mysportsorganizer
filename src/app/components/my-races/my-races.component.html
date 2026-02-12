@@ -21,7 +21,7 @@
     <p-button [disabled]="!selectedCourse() || !selectedCourse().length" label="Supprimer" class="ml-2.5" severity="danger" (onClick)="deleteRace()" />
   </div>
   @if (courseTypeSelected() === 0) {
-    <p-table [value]="coursesToCome()" selectionMode="multiple" [selection]="selectedCourse()" dataKey="id" class="mt-2" (selectionChange)="setSelected($event)" [tableStyle]="{ 'min-width': '50rem' }">
+    <p-table [value]="coursesToCome()" [size]="'small'" selectionMode="multiple" [selection]="selectedCourse()" dataKey="id" class="mt-2" (selectionChange)="setSelected($event)" [tableStyle]="{ 'min-width': '50rem' }">
       <ng-template #header>
         <tr>
           <th style="width: 4rem">
@@ -33,6 +33,7 @@
           <th>Dénivelé</th>
           <th>Date</th>
           <th>Jours restants</th>
+          <th>GPX</th>
         </tr>
       </ng-template>
       <ng-template #body let-course>
@@ -46,6 +47,7 @@
           <td>{{ course.denivele + ' D+'}}</td>
           <td>{{ course.date  | date: 'fullDate'}}</td>
           <td>{{ getRemaingDays(course.date)}}</td>
+          <button pButton [size]="'small'" type="button" icon="pi pi-map" (click)="onShowRowMap(course)"></button>
         </tr>
       </ng-template>
     </p-table>
@@ -86,6 +88,15 @@
     </p-table>
   }
 </div>
+@if (gpxFileToLoad()) {
+  <div class="flex justify-between items-center mt-20 mb-20">
+    <div class="w-10/12 m-auto">
+      <app-map [traceUrl]="gpxFileToLoad"></app-map>
+    </div>
+  </div>
+}
+
+
 
 @defer {
   <p-dialog header="Nouvelle course" [modal]="true" [(visible)]="visible" [ngStyle]="{ 'width.%': modalWidth }">

@@ -1,5 +1,5 @@
 import {Component, DestroyRef, effect, inject, OnInit, signal} from '@angular/core';
-import {Button} from 'primeng/button';
+import {Button, ButtonDirective} from 'primeng/button';
 import {ToastService} from '../../services/toast.service';
 import {Sport} from '../../models/sports.model';
 import {SportsService} from '../../services/sports/sports.service';
@@ -20,6 +20,7 @@ import {CheckboxModule} from 'primeng/checkbox';
 import {forkJoin} from 'rxjs';
 import {LoginService} from '../../services/login/login.service';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
+import {GpxTrackComponent} from '../gpx-track/gpx-track.component';
 
 @Component({
   selector: 'my-races',
@@ -34,7 +35,8 @@ import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
     DatePickerModule,
     SelectButtonModule,
     TableModule, DatePipe,
-    CheckboxModule, NgStyle
+    CheckboxModule, NgStyle,
+    GpxTrackComponent, ButtonDirective
   ],
   templateUrl: './my-races.component.html',
   styleUrl: './my-races.component.scss',
@@ -76,6 +78,8 @@ export class MyRacesComponent implements OnInit {
 
   isMobile = signal(false);
   modalWidth = signal('60');
+
+  gpxFileToLoad = signal('');
 
   constructor() {
     this.setEffects();
@@ -169,7 +173,8 @@ export class MyRacesComponent implements OnInit {
         finished: Boolean(this.courseForm.value.finished),
         date: new Date(this.courseForm.value.date || new Date()),
         sportId: (this.courseForm.value.sport as Sport).id,
-        userId: this.loginService.userConnected()!.id
+        userId: this.loginService.userConnected()!.id,
+        gpxFile: '',
       }
       this.coursesService.addCourse(courseToAdd).subscribe((res: CourseDto) => {
         if (res && res.TITRE) {
@@ -207,7 +212,6 @@ export class MyRacesComponent implements OnInit {
   }
 
   protected setSelected($event: any) {
-    console.log($event);
     this.selectedCourse.set($event)
   }
 
@@ -219,5 +223,14 @@ export class MyRacesComponent implements OnInit {
       }
       this.onSportSelected(sport.id);
     });
+  }
+
+  protected onShowRowMap(course: Course) {
+      const file = course.gpxFile;
+    if (file) {
+      this.gpxFileToLoad.set(file);
+    } else {
+      this.gpxFileToLoad.set('');
+    }
   }
 }

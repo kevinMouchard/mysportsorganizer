@@ -21,7 +21,8 @@ describe('CourseCard', () => {
     TIME: 15000000,
     FINISHED: true,
     SPORT_ID: 1,
-    USER_ID: 1
+    USER_ID: 1,
+    GPX_FILE: 'trace.gpx'
 }
 
   beforeAll(() => {

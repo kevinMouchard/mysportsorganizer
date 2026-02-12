@@ -48,16 +48,17 @@ export class App implements OnInit {
         icon: 'pi pi-home',
         routerLink: ['/my-races']
       },
-      // {
-      //   label: 'Courses',
-      //   icon: 'pi pi-star',
-      //   items: [
-      //     {
-      //       label: 'Mes courses',
-      //       routerLink: ['/my-races']
-      //     }
-      //   ]
-      // },
+      {
+        label: 'Courses',
+        icon: 'pi pi-star',
+        routerLink: ['/my-races']
+        // items: [
+        //   {
+        //     label: 'Mes courses',
+        //     routerLink: ['/my-races']
+        //   }
+        // ]
+      },
       // {
       //   label: 'Entrainements',
       //   icon: 'pi pi-search'
