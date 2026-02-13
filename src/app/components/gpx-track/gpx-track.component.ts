@@ -9,11 +9,9 @@ import {
   ElementRef
 } from '@angular/core';
 import * as L from 'leaflet';
-(window as any).L = L;
-import 'leaflet-gpx';
 import { Chart } from 'chart.js/auto';
 import { HttpClient } from '@angular/common/http';
-import {DecimalPipe} from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -29,13 +27,12 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
   @ViewChild('elevationChart') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
   private map?: L.Map;
-  private gpxLayer?: any;
+  private trackLayer?: L.Polyline;
   private chart?: Chart;
-  private hoverMarker?: L.Marker;
+  private hoverMarker?: L.CircleMarker;
 
   private mapContainer = signal<HTMLDivElement | null>(null);
 
-  // 🔹 signals pour stats
   totalDistance = signal(0);
   totalGain = signal(0);
   totalLoss = signal(0);
@@ -48,13 +45,13 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
 
       if (!this.map) this.initMap(container);
 
-      if (this.gpxLayer) {
-        this.map!.removeLayer(this.gpxLayer);
-        this.gpxLayer = undefined;
+      if (this.trackLayer) {
+        this.map!.removeLayer(this.trackLayer);
+        this.trackLayer = undefined;
       }
 
       if (url) {
-        this.loadGPX(url);
+        this.loadAndParseGPX(url);
       }
     });
   }
@@ -65,53 +62,40 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
   }
 
   private initMap(container: HTMLDivElement) {
-    this.map = L.map(container).setView([43.5297, 5.4474], 13);
+    this.map = L.map(container);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(this.map);
 
-    setTimeout(() => this.map?.invalidateSize(), 100);
+    this.hoverMarker = L.circleMarker([0, 0], {
+      radius: 6,
+      color: '#ff0000',
+      fillColor: '#ff0000',
+      fillOpacity: 1
+    }).addTo(this.map);
 
-    this.hoverMarker = L.marker([0, 0]).addTo(this.map);
-    this.hoverMarker.setOpacity(0);
+    this.hoverMarker.setStyle({ opacity: 0, fillOpacity: 0 });
   }
 
-  private loadGPX(url: string) {
-    if (!this.map) return;
-
-    const gpx = new (L as any).GPX('assets/' + url, {
-      async: true,
-      polyline_options: { color: 'red', weight: 4 }
-    });
-
-    gpx.on('loaded', (e: any) => {
-      const bounds = e.target.getBounds();
-      if (bounds.isValid()) this.map?.fitBounds(bounds, { padding: [20, 20] });
-
-      // 🔹 Parse GPX pour profil
-      this.http.get('assets/' + url, { responseType: 'text' })
-        .subscribe(xmlText => this.parseGPX(xmlText));
-    });
-
-    gpx.addTo(this.map);
-    this.gpxLayer = gpx;
+  private loadAndParseGPX(url: string) {
+    this.http.get('assets/' + url, { responseType: 'text' })
+      .subscribe(xmlText => this.parseGPX(xmlText));
   }
 
   private parseGPX(xmlText: string) {
+
     const parser = new DOMParser();
     const xml = parser.parseFromString(xmlText, "application/xml");
+
     const trkpts = Array.from(xml.querySelectorAll("trkpt"));
 
-    if (!trkpts.length) {
-      console.warn('Aucun point trouvé dans le GPX');
-      return;
-    }
+    if (!trkpts.length) return;
 
+    const latlngs: L.LatLng[] = [];
     const elevations: number[] = [];
     const labels: number[] = [];
-    const latlngs: L.LatLng[] = [];
 
     let distance = 0;
     let gain = 0;
@@ -120,6 +104,7 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
     let prevEle: number | null = null;
 
     for (const trkpt of trkpts) {
+
       const lat = parseFloat(trkpt.getAttribute("lat")!);
       const lng = parseFloat(trkpt.getAttribute("lon")!);
       const ele = parseFloat(trkpt.querySelector("ele")?.textContent ?? "0");
@@ -128,7 +113,9 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
       latlngs.push(latlng);
 
       if (prevLatLng) {
-        distance += prevLatLng.distanceTo(latlng) / 1000;
+        const d = prevLatLng.distanceTo(latlng) / 1000;
+        distance += d;
+
         if (prevEle !== null) {
           const delta = ele - prevEle;
           if (delta > 0) gain += delta;
@@ -143,15 +130,25 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
       prevEle = ele;
     }
 
-    // 🔹 mise à jour des signals pour stats
+    // 🔹 Dessiner la trace
+    this.trackLayer = L.polyline(latlngs, {
+      color: '#ff3b30',
+      weight: 4
+    }).addTo(this.map!);
+
+    this.map!.fitBounds(this.trackLayer.getBounds(), { padding: [20, 20] });
+
+    // 🔹 Update stats
     this.totalDistance.set(distance);
     this.totalGain.set(gain);
     this.totalLoss.set(loss);
 
+    // 🔹 Graph
     this.buildChart(labels, elevations, latlngs);
   }
 
   private buildChart(labels: number[], data: number[], latlngs: L.LatLng[]) {
+
     if (!this.chartCanvas?.nativeElement) return;
 
     if (this.chart) this.chart.destroy();
@@ -164,12 +161,11 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
       data: {
         labels,
         datasets: [{
-          label: 'Altitude (m)',
           data,
           fill: true,
-          tension: 0.2,
-          borderColor: '#FF5733',
-          backgroundColor: 'rgba(255,87,51,0.3)',
+          tension: 0.25,
+          borderColor: '#ff3b30',
+          backgroundColor: 'rgba(255,59,48,0.25)',
           pointRadius: 0
         }]
       },
@@ -178,32 +174,31 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          tooltip: {
-            enabled: true,
-            callbacks: {
-              label: (ctx) => `Altitude: ${ctx.raw} m`
-            }
-          }
+          legend: { display: false }
         },
         scales: {
-          x: { title: { display: true, text: 'Distance (km)' } },
-          y: { title: { display: true, text: 'Altitude (m)' } }
+          x: { display: false },
+          y: { display: true }
         },
-        onHover: (evt, activeEls) => {
+        onHover: (_, activeEls) => {
           if (!activeEls.length) {
-            this.hoverMarker?.setOpacity(0);
+            this.hoverMarker?.setStyle({ opacity: 0, fillOpacity: 0 });
             return;
           }
+
           const idx = activeEls[0].index;
           const latlng = latlngs[idx];
-          this.hoverMarker?.setLatLng(latlng).setOpacity(1);
+
+          this.hoverMarker
+            ?.setLatLng(latlng)
+            .setStyle({ opacity: 1, fillOpacity: 1 });
         }
       }
     });
   }
 
   ngOnDestroy(): void {
-    if (this.gpxLayer) this.map?.removeLayer(this.gpxLayer);
+    if (this.trackLayer) this.map?.removeLayer(this.trackLayer);
     if (this.chart) this.chart.destroy();
     if (this.hoverMarker) this.map?.removeLayer(this.hoverMarker);
     this.map?.remove();
