@@ -20,6 +20,9 @@ input.ng-invalid.ng-touched {
 .right {
   float: right;
 }
+.left {
+  float: left;
+}
 
 .bold {
   font-weight: bold;

@@ -36,7 +36,7 @@ import {GpxTrackComponent} from '../gpx-track/gpx-track.component';
     SelectButtonModule,
     TableModule, DatePipe,
     CheckboxModule, NgStyle,
-    GpxTrackComponent, ButtonDirective
+    GpxTrackComponent
   ],
   templateUrl: './my-races.component.html',
   styleUrl: './my-races.component.scss',
@@ -74,12 +74,12 @@ export class MyRacesComponent implements OnInit {
   coursesToCome = signal<Course[]>([]);
   coursesOld = signal<Course[]>([]);
 
-  selectedCourse =  signal<Course[]>([]);
+  selectedCourse =  signal<Course | null>(null);
 
   isMobile = signal(false);
   modalWidth = signal('60');
 
-  gpxFileToLoad = signal('');
+  gpxFileToLoad = signal<{gpxFile: string, name: string}>({gpxFile: '', name: ''});
 
   constructor() {
     this.setEffects();
@@ -109,12 +109,12 @@ export class MyRacesComponent implements OnInit {
   }
 
   protected deleteRace() {
-    if (!this.selectedCourse() || !this.selectedCourse()?.length) {
+    if (!this.selectedCourse()) {
       return;
     }
-    const ids: number[] = this.selectedCourse()!.map(s => s.id);
+    const ids: number[] = [this.selectedCourse()!.id];
     this.confirmationService.confirm({
-      message: 'Supprimer <span class="bold">' + this.selectedCourse()!.map(s => s.titre).join(', ') + '</span> ?',
+      message: 'Supprimer <span class="bold">' + this.selectedCourse()!.titre + '</span> ?',
       header: 'Suppression',
       icon: 'pi pi-info-circle',
       rejectLabel: 'Annuler',
@@ -129,12 +129,14 @@ export class MyRacesComponent implements OnInit {
       },
 
       accept: () => {
-        const reqs = this.selectedCourse()!.map(s => this.coursesService.deleteCourse(s.id));
+        // const reqs = this.selectedCourse()!.map(s => this.coursesService.deleteCourse(s.id));
+        const reqs = [this.coursesService.deleteCourse(this.selectedCourse()!.id)];
         forkJoin(reqs).subscribe(() => {
           this.coursesToCome.set(this.coursesToCome().filter(c => !ids.find(i => c.id === i)));
           this.coursesOld.set(this.coursesOld().filter(c => !ids.find(i => c.id === i)));
-          this.toastService.showMessage(this.selectedCourse()!.length > 1 ? 'Courses supprimées' : 'Course supprimée');
-          this.selectedCourse.set([]);
+          // this.toastService.showMessage(this.selectedCourse()!.length > 1 ? 'Courses supprimées' : 'Course supprimée');
+          this.toastService.showMessage('Course supprimée');
+          this.selectedCourse.set(null);
         })
       },
       reject: () => {
@@ -196,7 +198,7 @@ export class MyRacesComponent implements OnInit {
 
   protected courseTypeChanged(selected: any) {
     this.courseTypeSelected.set(selected.value);
-    this.selectedCourse.set([]);
+    this.selectedCourse.set(null);
   }
 
   public getRemaingDays(date: Date) {
@@ -212,25 +214,37 @@ export class MyRacesComponent implements OnInit {
   }
 
   protected setSelected($event: any) {
+    console.log($event)
     this.selectedCourse.set($event)
+    this.onShowRowMap(this.selectedCourse()!);
   }
 
   private setEffects() {
     effect(() => {
       const sport = this._selectedSport();
+      this.gpxFileToLoad.set({gpxFile: '', name: ''});
+      this.selectedCourse.set(null);
       if (!sport) {
         return;
       }
       this.onSportSelected(sport.id);
+    });
+    effect(() => {
+      const selectedCourse = this.selectedCourse();
+      if (!selectedCourse) {
+        this.gpxFileToLoad.set({gpxFile: '', name: ''});
+        return;
+      }
+      this.onShowRowMap(selectedCourse);
     });
   }
 
   protected onShowRowMap(course: Course) {
       const file = course.gpxFile;
     if (file) {
-      this.gpxFileToLoad.set(file);
+      this.gpxFileToLoad.set({gpxFile: file, name: course.titre});
     } else {
-      this.gpxFileToLoad.set('');
+      this.gpxFileToLoad.set({gpxFile: '', name: ''});
     }
   }
 }

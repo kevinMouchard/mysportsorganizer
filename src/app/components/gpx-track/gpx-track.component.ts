@@ -12,6 +12,7 @@ import * as L from 'leaflet';
 import { Chart } from 'chart.js/auto';
 import { HttpClient } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
+import { computed } from '@angular/core';
 
 @Component({
   standalone: true,
@@ -20,9 +21,9 @@ import { DecimalPipe } from '@angular/common';
   templateUrl: './gpx-track.component.html',
   styleUrls: ['./gpx-track.component.scss']
 })
-export class GpxTrackComponent implements AfterViewInit, OnDestroy {
+export class GpxTrackComponent implements OnDestroy {
 
-  @Input() traceUrl = signal<string>('');
+  @Input() traceUrlObj = signal<{gpxFile: string, name: string}>({gpxFile: '', name: ''});
 
   @ViewChild('elevationChart') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -31,35 +32,46 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
   private chart?: Chart;
   private hoverMarker?: L.CircleMarker;
 
-  private mapContainer = signal<HTMLDivElement | null>(null);
+  @ViewChild('mapContainer')
+  set mapContainerSetter(el: ElementRef<HTMLDivElement> | undefined) {
+    if (!el) return;
+
+    this.initMap(el.nativeElement);
+
+    const urlObj = this.traceUrlObj();
+    if (urlObj?.gpxFile) {
+      this.loadAndParseGPX(urlObj.gpxFile);
+    }
+  }
 
   totalDistance = signal(0);
   totalGain = signal(0);
   totalLoss = signal(0);
 
+  hasTrace = computed(() => !!this.traceUrlObj()?.gpxFile);
+
   constructor(private http: HttpClient) {
     effect(() => {
-      const url = this.traceUrl();
-      const container = this.mapContainer();
-      if (!container) return;
 
-      if (!this.map) this.initMap(container);
+      const urlObj = this.traceUrlObj();
+
+      if (!urlObj?.gpxFile) {
+        this.destroyMap();
+        return;
+      }
+
+      if (!this.map) return;
 
       if (this.trackLayer) {
-        this.map!.removeLayer(this.trackLayer);
+        this.map.removeLayer(this.trackLayer);
         this.trackLayer = undefined;
       }
 
-      if (url) {
-        this.loadAndParseGPX(url);
-      }
+      this.loadAndParseGPX(urlObj.gpxFile);
+
     });
   }
 
-  ngAfterViewInit(): void {
-    const container = document.querySelector<HTMLDivElement>('.map')!;
-    this.mapContainer.set(container);
-  }
 
   private initMap(container: HTMLDivElement) {
     this.map = L.map(container);
@@ -203,4 +215,29 @@ export class GpxTrackComponent implements AfterViewInit, OnDestroy {
     if (this.hoverMarker) this.map?.removeLayer(this.hoverMarker);
     this.map?.remove();
   }
+  private destroyMap() {
+    if (this.trackLayer) {
+      this.map?.removeLayer(this.trackLayer);
+      this.trackLayer = undefined;
+    }
+
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = undefined;
+    }
+
+    if (this.hoverMarker) {
+      this.map?.removeLayer(this.hoverMarker);
+    }
+
+    if (this.map) {
+      this.map.remove();
+      this.map = undefined;
+    }
+
+    this.totalDistance.set(0);
+    this.totalGain.set(0);
+    this.totalLoss.set(0);
+  }
+
 }

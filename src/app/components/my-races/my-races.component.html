@@ -4,60 +4,52 @@
   </span>
 </div>
 
-<div class="flex mt-5 mb-5">
-  <p-select [options]="sports()"
-            [(ngModel)]="_selectedSport"
-            optionLabel="nom" class="w-full md:w-56"/>
-
-</div>
-
 <div class="flex justify-between items-center">
-  <p-selectbutton [options]="courseOptions" [(ngModel)]="courseTypeSelected" class="m-auto" optionLabel="label" optionValue="value" aria-labelledby="basic" (onChange)="courseTypeChanged($event)"></p-selectbutton>
+  <div class="">
+    <p-select [options]="sports()"
+              [(ngModel)]="_selectedSport"
+              optionLabel="nom" class="w-full md:w-56"/>
+  </div>
 </div>
+
 
 <div>
-  <div class="ml-0.5">
-    <p-button [disabled]="!_selectedSport()" label="Ajouter" (onClick)="showAddRaceDialog()" />
-    <p-button [disabled]="!selectedCourse() || !selectedCourse().length" label="Supprimer" class="ml-2.5" severity="danger" (onClick)="deleteRace()" />
+  <div class="flex flex-wrap mt-5">
+    <div class="w-6/12">
+      <p-button [disabled]="!_selectedSport()" label="Ajouter" (onClick)="showAddRaceDialog()" />
+      <p-button [disabled]="!selectedCourse()" label="Supprimer" class="ml-2.5" severity="danger" (onClick)="deleteRace()" />
+    </div>
+    <div class="w-6/12 flex justify-end">
+      <p-selectbutton [options]="courseOptions" [(ngModel)]="courseTypeSelected" optionLabel="label" optionValue="value" aria-labelledby="basic" (onChange)="courseTypeChanged($event)"></p-selectbutton>
+    </div>
   </div>
   @if (courseTypeSelected() === 0) {
-    <p-table [value]="coursesToCome()" [size]="'small'" selectionMode="multiple" [selection]="selectedCourse()" dataKey="id" class="mt-2" (selectionChange)="setSelected($event)" [tableStyle]="{ 'min-width': '50rem' }">
+    <p-table [value]="coursesToCome()" [size]="'small'" selectionMode="single" [selection]="selectedCourse()" dataKey="id" class="mt-2" (selectionChange)="setSelected($event)" [tableStyle]="{ 'min-width': '50rem' }">
       <ng-template #header>
         <tr>
-          <th style="width: 4rem">
-            <p-tableHeaderCheckbox />
-          </th>
           <th>Titre</th>
           <th>Nom de course</th>
           <th>Distance (Km)</th>
           <th>Dénivelé</th>
           <th>Date</th>
           <th>Jours restants</th>
-          <th>GPX</th>
         </tr>
       </ng-template>
       <ng-template #body let-course>
-        <tr>
-          <td>
-            <p-tableCheckbox [value]="course" />
-          </td>
+        <tr [pSelectableRow]="course">
           <td>{{ course.titre }}</td>
           <td>{{ course.nomCourse }}</td>
           <td>{{ course.distance / 1000}}</td>
           <td>{{ course.denivele + ' D+'}}</td>
           <td>{{ course.date  | date: 'fullDate'}}</td>
           <td>{{ getRemaingDays(course.date)}}</td>
-          <button pButton [size]="'small'" type="button" icon="pi pi-map" (click)="onShowRowMap(course)"></button>
         </tr>
       </ng-template>
     </p-table>
   } @else {
-      <p-table [value]="coursesOld()" selectionMode="multiple" [selection]="selectedCourse()" dataKey="id" class="mt-2" (selectionChange)="this.selectedCourse.set($event)"  [tableStyle]="{ 'min-width': '50rem' }">
+      <p-table [value]="coursesOld()" selectionMode="single" [size]="'small'" [selection]="selectedCourse()" dataKey="id" class="mt-2" (selectionChange)="this.selectedCourse.set($event)"  [tableStyle]="{ 'min-width': '50rem' }">
       <ng-template #header>
         <tr>
-          <th style="width: 4rem">
-            <p-tableHeaderCheckbox />
-          </th>
           <th>Titre</th>
           <th>Nom de course</th>
           <th>Distance (Km)</th>
@@ -68,10 +60,7 @@
         </tr>
       </ng-template>
       <ng-template #body let-course>
-        <tr>
-          <td>
-            <p-tableCheckbox [value]="course" />
-          </td>
+        <tr [pSelectableRow]="course">
           <td>{{ course.titre }}</td>
           <td>{{ course.nomCourse }}</td>
           <td>{{ course.distance / 1000}}</td>
@@ -88,18 +77,16 @@
     </p-table>
   }
 </div>
-@if (gpxFileToLoad()) {
-  <div class="flex justify-between items-center mt-20 mb-20">
+@defer (when gpxFileToLoad().gpxFile) {
+  <div class="flex justify-between items-center mt-2 mb-20">
     <div class="w-10/12 m-auto">
-      <app-map [traceUrl]="gpxFileToLoad"></app-map>
+      <app-map [traceUrlObj]="gpxFileToLoad"></app-map>
     </div>
   </div>
 }
 
-
-
-@defer {
-  <p-dialog header="Nouvelle course" [modal]="true" [(visible)]="visible" [ngStyle]="{ 'width.%': modalWidth }">
+<p-dialog header="Nouvelle course" [modal]="true" [(visible)]="visible" [ngStyle]="{ 'width.%': modalWidth }">
+  @defer (when visible()) {
     <form [formGroup]="courseForm" class="p-fluid">
       <div class="flex items-center gap-4 mb-4">
         <label for="distance" class="font-semibold w-24">Sport *</label>
@@ -145,5 +132,5 @@
         <p-button label="Save" (click)="saveRace()" />
       </div>
     </form>
-  </p-dialog>
-}
+  }
+</p-dialog>
