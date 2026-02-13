@@ -6,10 +6,10 @@ import {
   signal,
   Input,
   ViewChild,
-  ElementRef,
-  NgZone
+  ElementRef
 } from '@angular/core';
 import * as L from 'leaflet';
+(window as any).L = L;
 import 'leaflet-gpx';
 import { Chart } from 'chart.js/auto';
 import { HttpClient } from '@angular/common/http';
